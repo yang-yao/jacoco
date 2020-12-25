@@ -816,6 +816,20 @@
       </build>
     </profile>
 
+    <profile>
+      <id>java5-bytecode</id>
+      <activation>
+        <property>
+          <name>bytecode.version</name>
+          <value>5</value>
+        </property>
+      </activation>
+      <properties>
+        <maven.compiler.source>1.5</maven.compiler.source>
+        <maven.compiler.target>1.5</maven.compiler.target>
+      </properties>
+    </profile>
+
     <!--
     Following profiles enable compilation into bytecode version 13
     when requested "bytecode.version" greater than 13,
