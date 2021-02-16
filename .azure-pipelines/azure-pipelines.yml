@@ -32,7 +32,7 @@ jobs:
       JDK 17:
         JDK_VERSION: 17
   pool:
-    vmImage: 'ubuntu-18.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - bash: |
       set -e
