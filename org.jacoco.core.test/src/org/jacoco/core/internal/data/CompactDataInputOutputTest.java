@@ -14,10 +14,15 @@ package org.jacoco.core.internal.data;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
+import org.jacoco.core.data.ChainNode;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -114,6 +119,37 @@ public class CompactDataInputOutputTest {
 			assertEquals("Index " + i, Boolean.valueOf(values[i]),
 					Boolean.valueOf(actual[i]));
 		}
+	}
+
+	@Test
+	public void testSetArray() throws IOException {
+		HashSet[] sets = new HashSet[15];
+		for (int i = 0; i < sets.length; i++) {
+			sets[i] = new HashSet();
+		}
+		sets[0].add("com/test/test/Hello.B()V");
+		out.writeSetArray(sets);
+		final HashSet[] actual = in.readSetArray();
+		System.out.println(actual);
+	}
+
+	@Test
+	public void testBigFile() throws IOException {
+		String result = FileUtils.readFileToString(
+				new File("C:\\Users\\wl\\Desktop\\chain.txt"));
+		out.writeUTF(result);
+		String actual = in.readUTF();
+		FileUtils.write(new File("C:\\Users\\wl\\Desktop\\newChain.txt"),
+				actual, true);
+	}
+
+	@Test
+	public void testNullData() throws Exception {
+		Set<ChainNode> chainNodes = new HashSet<>();
+		chainNodes.add(new ChainNode());
+		out.writeChainNodeSet(chainNodes);
+		final Set<ChainNode> actual = in.readChainNodeSet();
+		System.out.println(actual);
 	}
 
 }

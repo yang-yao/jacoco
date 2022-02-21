@@ -12,9 +12,18 @@
  *******************************************************************************/
 package org.jacoco.core.internal.data;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import com.test.diff.common.util.JacksonUtil;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.jacoco.core.data.ChainNode;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Additional data output methods for compact storage of data structures.
@@ -79,6 +88,56 @@ public class CompactDataOutput extends DataOutputStream {
 		if (bufferSize > 0) {
 			writeByte(buffer);
 		}
+	}
+
+	public void writeSetArray(final HashSet[] sets) throws IOException {
+		// int count = 1;
+		writeVarInt(sets.length);
+		for (Set set : sets) {
+			// System.out.println("send ----" + count);
+			// count++;
+			Iterator iterator = set.iterator();
+			while (iterator.hasNext()) {
+				Object object = iterator.next();
+				if (object == null) {
+					object = "";
+				}
+				String uri = String.valueOf(object);
+				writeUTF(uri);
+			}
+			writeUTF("next");
+		}
+	}
+
+	public void writeStrSet(final Set<String> sets) throws IOException {
+		writeVarInt(sets.size());
+		for (String str : sets) {
+			writeUTF(str);
+		}
+	}
+
+	public static final int WRITE_READ_UTF_MAX_LENGTH = 65535;
+
+	public void writeChainNodeSet(Set<ChainNode> chainNodes) throws Exception {
+		System.out.println("chain set size: " + chainNodes.size());
+		writeVarInt(chainNodes.size());
+		for (ChainNode chainNode : chainNodes) {
+			String str = JacksonUtil.serialize(chainNode);
+			// writeVarInt(bytes.length);
+			// write(bytes);
+			if (str.length() > WRITE_READ_UTF_MAX_LENGTH) {
+				for (int i = 1; i < str.length() / WRITE_READ_UTF_MAX_LENGTH
+						+ 2; i++) {
+					writeUTF(str.substring(WRITE_READ_UTF_MAX_LENGTH * (i - 1),
+							WRITE_READ_UTF_MAX_LENGTH * i < str.length()
+									? WRITE_READ_UTF_MAX_LENGTH * i
+									: str.length()));
+				}
+			} else {
+				writeUTF(str);
+			}
+		}
+		System.out.println("chainNode set output completed");
 	}
 
 }

@@ -71,4 +71,14 @@ public class CondyProbeArrayStrategy implements IProbeArrayStrategy {
 		mv.visitEnd();
 	}
 
+	@Override
+	public void callChainHandleMethod(MethodVisitor mv, String uri) {
+
+	}
+
+	@Override
+	public void SetCalledNodeMethod(MethodVisitor mv, String uri) {
+
+	}
+
 }

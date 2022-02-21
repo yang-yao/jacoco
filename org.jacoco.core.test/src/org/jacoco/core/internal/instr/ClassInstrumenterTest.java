@@ -70,4 +70,14 @@ public class ClassInstrumenterTest implements IProbeArrayStrategy {
 	public void addMembers(ClassVisitor cv, int probeCount) {
 	}
 
+	@Override
+	public void callChainHandleMethod(MethodVisitor mv, String uri) {
+
+	}
+
+	@Override
+	public void SetCalledNodeMethod(MethodVisitor mv, String uri) {
+
+	}
+
 }

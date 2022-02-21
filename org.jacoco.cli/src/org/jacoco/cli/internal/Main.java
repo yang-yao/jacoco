@@ -15,6 +15,7 @@ package org.jacoco.cli.internal;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.Arrays;
 
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
@@ -42,7 +43,7 @@ public class Main extends Command {
 
 	private final String[] args;
 
-	Main(final String... args) {
+	public Main(final String... args) {
 		this.args = args;
 	}
 

@@ -15,6 +15,8 @@ package org.jacoco.core.data;
 import static java.lang.String.format;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * Execution data for a single Java class. While instances are immutable care
@@ -28,6 +30,11 @@ public final class ExecutionData {
 	private final String name;
 
 	private final boolean[] probes;
+
+	/**
+	 * 类探针对应的调用者标记
+	 */
+	private HashSet[] calledFlags;
 
 	/**
 	 * Creates a new {@link ExecutionData} object with the given probe data.
@@ -46,6 +53,14 @@ public final class ExecutionData {
 		this.probes = probes;
 	}
 
+	public ExecutionData(final long id, final String name,
+			final boolean[] probes, HashSet[] calledFlags) {
+		this.id = id;
+		this.name = name;
+		this.probes = probes;
+		this.calledFlags = calledFlags;
+	}
+
 	/**
 	 * Creates a new {@link ExecutionData} object with the given probe data
 	 * length. All probes are set to <code>false</code>.
@@ -62,6 +77,14 @@ public final class ExecutionData {
 		this.id = id;
 		this.name = name;
 		this.probes = new boolean[probeCount];
+	}
+
+	public HashSet[] getCalledFlags() {
+		return calledFlags;
+	}
+
+	public void setCalledFlags(HashSet[] calledFlags) {
+		this.calledFlags = calledFlags;
 	}
 
 	/**
@@ -98,6 +121,14 @@ public final class ExecutionData {
 	 */
 	public void reset() {
 		Arrays.fill(probes, false);
+		if (Objects.isNull(calledFlags)) {
+			return;
+		}
+		Arrays.stream(calledFlags).forEach(item -> {
+			if (!Objects.isNull(item)) {
+				item.clear();
+			}
+		});
 	}
 
 	/**
@@ -160,9 +191,15 @@ public final class ExecutionData {
 		assertCompatibility(other.getId(), other.getName(),
 				other.getProbes().length);
 		final boolean[] otherData = other.getProbes();
+		final HashSet[] otherCalledFlags = other.getCalledFlags();
 		for (int i = 0; i < probes.length; i++) {
 			if (otherData[i]) {
 				probes[i] = flag;
+			}
+			if (calledFlags != null && otherCalledFlags != null
+					&& calledFlags[i] != null && otherCalledFlags[i] != null) {
+				// 每个探针对应的called flag 都要合并
+				calledFlags[i].addAll(otherCalledFlags[i]);
 			}
 		}
 	}

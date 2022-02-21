@@ -19,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.instrument.IllegalClassFormatException;
@@ -26,6 +27,7 @@ import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
 
+import org.apache.commons.io.FileUtils;
 import org.jacoco.core.JaCoCo;
 import org.jacoco.core.runtime.AbstractRuntime;
 import org.jacoco.core.runtime.AgentOptions;
@@ -222,6 +224,19 @@ public class CoverageTransformerTest {
 				"Error while instrumenting org.jacoco.Sample.",
 				IOException.class);
 		recorder.clear();
+	}
+
+	@Test
+	public void testTransformFunc() {
+		CoverageTransformer t = createTransformer();
+		try {
+			byte[] bytes = FileUtils.readFileToByteArray(new File(
+					"G:\\jvm\\jvmTest\\target\\classes\\com\\asm\\test\\AsmTest.class"));
+			t.transform(classLoader, "com/asm/test/AsmTest", null,
+					protectionDomain, bytes);
+		} catch (IllegalClassFormatException | IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Test

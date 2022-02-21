@@ -12,14 +12,13 @@
  *******************************************************************************/
 package org.jacoco.core.runtime;
 
-import org.jacoco.core.data.ExecutionData;
-import org.jacoco.core.data.ExecutionDataStore;
-import org.jacoco.core.data.IExecutionDataVisitor;
-import org.jacoco.core.data.ISessionInfoVisitor;
-import org.jacoco.core.data.SessionInfo;
+import org.jacoco.core.data.*;
 import org.jacoco.core.internal.instr.InstrSupport;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * Container for runtime execution and meta data. All access to the runtime data
@@ -41,6 +40,11 @@ public class RuntimeData {
 		store = new ExecutionDataStore();
 		sessionId = "<none>";
 		startTimeStamp = System.currentTimeMillis();
+		this.store.setCalledChainSets(ChainNodeHandle.chainsSet);
+	}
+
+	public ExecutionDataStore getStore() {
+		return this.store;
 	}
 
 	/**
@@ -93,10 +97,35 @@ public class RuntimeData {
 	}
 
 	/**
+	 * 增加了一个IProjectInfoVisitor ,重载collect方法
+	 *
+	 * @param executionDataVisitor
+	 * @param sessionInfoVisitor
+	 * @param projectInfoVisitor
+	 * @param reset
+	 */
+	public final void collect(final IExecutionDataVisitor executionDataVisitor,
+			final ISessionInfoVisitor sessionInfoVisitor,
+			final IProjectInfoVisitor projectInfoVisitor, final boolean reset) {
+		synchronized (store) {
+			final SessionInfo info = new SessionInfo(sessionId, startTimeStamp,
+					System.currentTimeMillis());
+			sessionInfoVisitor.visitSessionInfo(info);
+			// 写入项目信息
+			store.outputProjectInfo(projectInfoVisitor);
+			store.accept(executionDataVisitor);
+			if (reset) {
+				reset();
+			}
+		}
+	}
+
+	/**
 	 * Resets all coverage information.
 	 */
 	public final void reset() {
 		synchronized (store) {
+			ChainNodeHandle.chainsSet.clear();
 			store.reset();
 			startTimeStamp = System.currentTimeMillis();
 		}
@@ -163,6 +192,36 @@ public class RuntimeData {
 			getProbes((Object[]) args);
 		}
 		return super.equals(args);
+	}
+
+	/**
+	 * 这个方法用来返回HashSet数组
+	 *
+	 * @param args
+	 * @return
+	 */
+	public boolean generateCalledSetArray(final Object args) {
+		if (args instanceof Object[]) {
+			getCalledSets((Object[]) args);
+		}
+		return super.equals(args);
+	}
+
+	public void getCalledSets(final Object[] args) {
+		final Long classid = (Long) args[0];
+		final String name = (String) args[1];
+		final int probecount = ((Integer) args[2]).intValue();
+		ExecutionData exec = getExecutionData(classid, name, probecount);
+		if (exec.getCalledFlags() != null) {
+			args[0] = exec.getCalledFlags();
+			return;
+		}
+		HashSet[] calledFlags = new HashSet[probecount];
+		for (int i = 0, len = calledFlags.length; i < len; i++) {
+			calledFlags[i] = new HashSet();
+		}
+		exec.setCalledFlags(calledFlags);
+		args[0] = calledFlags;
 	}
 
 	/**

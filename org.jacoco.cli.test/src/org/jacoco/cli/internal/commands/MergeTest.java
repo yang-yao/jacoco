@@ -95,4 +95,18 @@ public class MergeTest extends CommandTestBase {
 		return names;
 	}
 
+	@Test
+	public void test_merge_exec_files() throws Exception {
+
+		File dump = new File(
+				"C:\\Users\\wl\\Desktop\\code-diff\\dump-1640598856313.exec");
+		File dump2 = new File("C:\\Users\\wl\\Desktop\\code-diff\\dump.exec");
+		File dest = new File("C:\\Users\\wl\\Desktop\\code-diff\\merge.exec");
+
+		execute("merge", "--destfile", dest.getAbsolutePath(),
+				dump.getAbsolutePath(), dump2.getAbsolutePath(), "--diffPort",
+				"1990");
+
+		assertOk();
+	}
 }

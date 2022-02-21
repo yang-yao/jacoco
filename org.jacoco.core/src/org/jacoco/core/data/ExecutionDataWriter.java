@@ -15,14 +15,16 @@ package org.jacoco.core.data;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.jacoco.core.internal.data.CompactDataOutput;
 
 /**
  * Serialization of execution data into binary streams.
  */
-public class ExecutionDataWriter
-		implements ISessionInfoVisitor, IExecutionDataVisitor {
+public class ExecutionDataWriter implements ISessionInfoVisitor,
+		IExecutionDataVisitor, IProjectInfoVisitor {
 
 	/**
 	 * File format version, will be incremented for each incompatible change.
@@ -45,6 +47,12 @@ public class ExecutionDataWriter
 
 	/** Block identifier for execution data of a single class. */
 	public static final byte BLOCK_EXECUTIONDATA = 0x11;
+
+	public static final byte BLOCK_CALLEDCHAINFLAG = 0x12;
+
+	public static final byte BLOCK_PROJECTINFO = 0x13;
+
+	public static final byte BLOCK_CALLEDCHAINNODEDATA = 0x14;
 
 	/** Underlying data output */
 	protected final CompactDataOutput out;
@@ -104,9 +112,36 @@ public class ExecutionDataWriter
 				out.writeLong(data.getId());
 				out.writeUTF(data.getName());
 				out.writeBooleanArray(data.getProbes());
+				if (data.getCalledFlags() != null) {
+					// write set array
+					out.writeByte(BLOCK_CALLEDCHAINFLAG);
+					out.writeSetArray(data.getCalledFlags());
+				}
 			} catch (final IOException e) {
 				throw new RuntimeException(e);
 			}
+		}
+	}
+
+	@Override
+	public void visitProjectInfo(String branchName, String commitId) {
+		try {
+			out.writeByte(BLOCK_PROJECTINFO);
+			out.writeUTF(branchName);
+			out.writeUTF(commitId);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	@Override
+	public void visitCalledChainData(Set<ChainNode> chainNodes) {
+		try {
+			out.writeByte(BLOCK_CALLEDCHAINNODEDATA);
+			out.writeChainNodeSet(chainNodes);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 

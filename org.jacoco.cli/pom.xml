@@ -126,4 +126,17 @@
       </plugin>
     </plugins>
   </build>
+  <!-- 组件上传配置 -->
+  <distributionManagement>
+    <repository>
+      <id>local-nexus-releases</id>
+      <name>Nexus Release Repository</name>
+      <url>http://192.168.100.24:9020/nexus/content/repositories/releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>local-nexus-snapshots</id>
+      <name>Nexus Snapshot Repository</name>
+      <url>http://192.168.100.24:9020/nexus/content/repositories/snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
 </project>

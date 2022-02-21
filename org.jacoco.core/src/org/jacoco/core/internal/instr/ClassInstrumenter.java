@@ -73,6 +73,9 @@ public class ClassInstrumenter extends ClassProbesVisitor {
 		final MethodVisitor frameEliminator = new DuplicateFrameEliminator(mv);
 		final ProbeInserter probeVariableInserter = new ProbeInserter(access,
 				name, desc, frameEliminator, probeArrayStrategy);
+		// set uri
+		probeVariableInserter.setUri(className + "." + name + desc);
+		probeVariableInserter.setClassName(className);
 		return new MethodInstrumenter(probeVariableInserter,
 				probeVariableInserter);
 	}

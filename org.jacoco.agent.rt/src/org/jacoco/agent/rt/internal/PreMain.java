@@ -21,6 +21,7 @@ import org.jacoco.core.runtime.AgentOptions;
 import org.jacoco.core.runtime.IRuntime;
 import org.jacoco.core.runtime.InjectedClassRuntime;
 import org.jacoco.core.runtime.ModifiedSystemClassRuntime;
+import org.jacoco.core.runtime.ChainNodeHandle;
 
 /**
  * The agent which is referred as the <code>Premain-Class</code>. The agent
@@ -44,7 +45,11 @@ public final class PreMain {
 	 */
 	public static void premain(final String options, final Instrumentation inst)
 			throws Exception {
-
+		/**
+		 * 主要是为了加载ChainNodeHandle类
+		 */
+		Set sets = ChainNodeHandle.chainsSet;
+		sets = null;
 		final AgentOptions agentOptions = new AgentOptions(options);
 
 		final Agent agent = Agent.getInstance(agentOptions);

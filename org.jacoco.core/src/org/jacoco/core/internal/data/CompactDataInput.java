@@ -12,9 +12,16 @@
  *******************************************************************************/
 package org.jacoco.core.internal.data;
 
+import com.test.diff.common.util.JacksonUtil;
+import org.jacoco.core.data.ChainNode;
+
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Additional data input methods for compact storage of data structures.
@@ -67,6 +74,50 @@ public class CompactDataInput extends DataInputStream {
 			buffer >>>= 1;
 		}
 		return value;
+	}
+
+	public HashSet[] readSetArray() throws IOException {
+		final HashSet<String>[] sets = new HashSet[readVarInt()];
+		for (int i = 0; i < sets.length; i++) {
+			HashSet<String> set = new HashSet<>();
+			sets[i] = set;
+			String value = readUTF();
+			while (!"next".equals(value)) {
+				set.add(value);
+				value = readUTF();
+			}
+		}
+		return sets;
+	}
+
+	public Set<String> readStrSet() throws IOException {
+		int size = readVarInt();
+		Set<String> calledChainStrSets = new HashSet<>();
+		while (size > 0) {
+			size--;
+			calledChainStrSets.add(readUTF());
+		}
+		return calledChainStrSets;
+	}
+
+	public static final int WRITE_READ_UTF_MAX_LENGTH = 65535;
+
+	public Set<ChainNode> readChainNodeSet() throws IOException {
+		int size = readVarInt();
+		Set<ChainNode> chainNodes = new HashSet<>();
+		while (size-- > 0) {
+			String str = readUTF();
+			StringBuilder sb = new StringBuilder();
+			while (str.length() >= WRITE_READ_UTF_MAX_LENGTH) {
+				sb.append(str);
+				str = readUTF();
+			}
+			sb.append(str);
+			ChainNode chainNode = JacksonUtil.deserialize(sb.toString(),
+					ChainNode.class);
+			chainNodes.add(chainNode);
+		}
+		return chainNodes;
 	}
 
 }

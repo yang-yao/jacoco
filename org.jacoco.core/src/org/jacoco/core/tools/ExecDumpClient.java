@@ -120,6 +120,7 @@ public class ExecDumpClient {
 			final RemoteControlReader remoteReader = new RemoteControlReader(
 					socket.getInputStream());
 			remoteReader.setSessionInfoVisitor(loader.getSessionInfoStore());
+			remoteReader.setProjectInfoVisitor(loader.getExecutionDataStore());
 			remoteReader
 					.setExecutionDataVisitor(loader.getExecutionDataStore());
 

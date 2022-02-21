@@ -17,6 +17,7 @@ import static java.lang.String.format;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.omg.CORBA.PUBLIC_MEMBER;
 
 /**
  * Constants and utilities for byte code instrumentation.
@@ -35,6 +36,8 @@ public final class InstrSupport {
 	 * Name of the field that stores coverage information of a class.
 	 */
 	public static final String DATAFIELD_NAME = "$jacocoData";
+
+	public static final String SET_DATA_FIELD_NAME = "$jacocoSet";
 
 	/**
 	 * Access modifiers of the field that stores coverage information of a
@@ -80,12 +83,43 @@ public final class InstrSupport {
 	 */
 	public static final String DATAFIELD_DESC = "[Z";
 
+	public static final String SET_DATA_FIELD_DESC = "[Ljava/util/HashSet;";
+
+	public static final String SET_DATA_FIELD_SIGNATURE = "[Ljava/util/HashSet;";
+
 	// === Init Method ===
 
 	/**
 	 * Name of the initialization method.
 	 */
 	public static final String INITMETHOD_NAME = "$jacocoInit";
+
+	/**
+	 * 获取jacocoCalledFlagSets 初始化方法
+	 */
+	public static final String INITSETMETHOD_NAME = "$jacocoSetInit";
+
+	/**
+	 * $jacocoSetInit方法的描述信息
+	 */
+	public static final String INITSETMETHOD_DESC = "()[Ljava/util/HashSet;";
+
+	/**
+	 * 处理调用链相关操作的类
+	 */
+	public static final String CHAIN_HANDLE_CLASSNAME = "org/jacoco/core/runtime/ChainNodeHandle";
+
+	public static final String SET_CALLED_FLAG_METHOD_NAME = "setCalledFlags";
+
+	public static final String SET_CALLED_FLAG_METHOD_DESC = "(Ljava/util/HashSet;)V";
+
+	public static final String ADD_CHAIN_NODE_METHOD_NAME = "addChainNode";
+
+	public static final String ADD_CHAIN_NODE_METHOD_DESC = "(Ljava/lang/String;)V";
+
+	public static final String SET_CALLED_NODE_METHOD_NAME = "setCalledNode";
+
+	public static final String SET_CALLED_NODE_METHOD_DESC = "(Ljava/lang/String;)V";
 
 	/**
 	 * Descriptor of the initialization method.

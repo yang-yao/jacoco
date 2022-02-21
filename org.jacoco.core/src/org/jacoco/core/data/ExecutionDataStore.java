@@ -12,12 +12,7 @@
  *******************************************************************************/
 package org.jacoco.core.data;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * In-memory data store for execution data. The data can be added through its
@@ -27,11 +22,18 @@ import java.util.Set;
  * coverage date from multiple runs. A instance of this class is not thread
  * safe.
  */
-public final class ExecutionDataStore implements IExecutionDataVisitor {
+public final class ExecutionDataStore
+		implements IExecutionDataVisitor, IProjectInfoVisitor {
 
 	private final Map<Long, ExecutionData> entries = new HashMap<Long, ExecutionData>();
 
 	private final Set<String> names = new HashSet<String>();
+
+	private Set<ChainNode> calledChainSets = new HashSet<ChainNode>();
+
+	private String branchName;
+
+	private String commitId;
 
 	/**
 	 * Adds the given {@link ExecutionData} object into the store. If there is
@@ -172,9 +174,54 @@ public final class ExecutionDataStore implements IExecutionDataVisitor {
 		}
 	}
 
+	public void outputProjectInfo(final IProjectInfoVisitor visitor) {
+		visitor.visitProjectInfo(this.getBranchName(), this.getCommitId());
+		if (this.getCallChainSets().size() > 0) {
+			visitor.visitCalledChainData(this.getCallChainSets());
+		}
+	}
+
 	// === IExecutionDataVisitor ===
 
+	@Override
 	public void visitClassExecution(final ExecutionData data) {
 		put(data);
 	}
+
+	// === IProjectInfoVisitor ====
+	@Override
+	public void visitProjectInfo(String branchName, String commitId) {
+		this.setBranchName(branchName);
+		this.setCommitId(commitId);
+	}
+
+	@Override
+	public void visitCalledChainData(Set<ChainNode> chainNodes) {
+		this.setCalledChainSets(chainNodes);
+	}
+
+	public void setCalledChainSets(Set<ChainNode> calledChainSets) {
+		this.calledChainSets = calledChainSets;
+	}
+
+	public Set<ChainNode> getCallChainSets() {
+		return calledChainSets;
+	}
+
+	public String getBranchName() {
+		return branchName;
+	}
+
+	public void setBranchName(String branchName) {
+		this.branchName = branchName;
+	}
+
+	public String getCommitId() {
+		return commitId;
+	}
+
+	public void setCommitId(String commitId) {
+		this.commitId = commitId;
+	}
+
 }

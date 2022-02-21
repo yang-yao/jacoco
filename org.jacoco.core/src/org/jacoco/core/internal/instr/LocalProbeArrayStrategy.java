@@ -51,4 +51,14 @@ class LocalProbeArrayStrategy implements IProbeArrayStrategy {
 		// nothing to do
 	}
 
+	@Override
+	public void callChainHandleMethod(MethodVisitor mv, String uri) {
+
+	}
+
+	@Override
+	public void SetCalledNodeMethod(MethodVisitor mv, String uri) {
+
+	}
+
 }

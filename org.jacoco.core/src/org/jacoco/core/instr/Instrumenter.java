@@ -83,6 +83,8 @@ public class Instrumenter {
 		};
 		final IProbeArrayStrategy strategy = ProbeArrayStrategyFactory
 				.createFor(classId, reader, accessorGenerator);
+		// System.out.println(">>>> probeArrayStrategy name: "
+		// + strategy.getClass().getName() + " <<<<");
 		final int version = InstrSupport.getMajorVersion(reader);
 		final ClassVisitor visitor = new ClassProbesAdapter(
 				new ClassInstrumenter(strategy, writer),

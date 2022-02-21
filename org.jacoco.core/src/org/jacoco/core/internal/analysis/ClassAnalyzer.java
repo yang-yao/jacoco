@@ -15,6 +15,7 @@ package org.jacoco.core.internal.analysis;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jacoco.core.data.MethodProbesInfo;
 import org.jacoco.core.internal.analysis.filter.Filters;
 import org.jacoco.core.internal.analysis.filter.IFilter;
 import org.jacoco.core.internal.analysis.filter.IFilterContext;
@@ -94,7 +95,6 @@ public class ClassAnalyzer extends ClassProbesVisitor
 	public MethodProbesVisitor visitMethod(final int access, final String name,
 			final String desc, final String signature,
 			final String[] exceptions) {
-
 		InstrSupport.assertNotInstrumented(name, coverage.getName());
 
 		final InstructionsBuilder builder = new InstructionsBuilder(probes);

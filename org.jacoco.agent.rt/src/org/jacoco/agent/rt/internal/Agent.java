@@ -120,6 +120,12 @@ public class Agent implements IAgent {
 	 */
 	public void startup() throws Exception {
 		try {
+			/**
+			 * 先设置下branchName 以及commitId属性
+			 */
+			data.getStore().setBranchName(options.getBranchName());
+			data.getStore().setCommitId(options.getCommitId());
+
 			String sessionId = options.getSessionId();
 			if (sessionId == null) {
 				sessionId = createSessionId();

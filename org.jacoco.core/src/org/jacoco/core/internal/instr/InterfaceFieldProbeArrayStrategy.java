@@ -91,6 +91,16 @@ class InterfaceFieldProbeArrayStrategy implements IProbeArrayStrategy {
 		}
 	}
 
+	@Override
+	public void callChainHandleMethod(MethodVisitor mv, String uri) {
+
+	}
+
+	@Override
+	public void SetCalledNodeMethod(MethodVisitor mv, String uri) {
+
+	}
+
 	private void createDataField(final ClassVisitor cv) {
 		cv.visitField(InstrSupport.DATAFIELD_INTF_ACC,
 				InstrSupport.DATAFIELD_NAME, InstrSupport.DATAFIELD_DESC, null,

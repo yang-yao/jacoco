@@ -50,6 +50,16 @@ public class ProbeInserterTest {
 
 			public void addMembers(ClassVisitor delegate, int probeCount) {
 			}
+
+			@Override
+			public void callChainHandleMethod(MethodVisitor mv, String uri) {
+
+			}
+
+			@Override
+			public void SetCalledNodeMethod(MethodVisitor mv, String uri) {
+
+			}
 		};
 	}
 

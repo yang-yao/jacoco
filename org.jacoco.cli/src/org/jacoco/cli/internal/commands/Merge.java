@@ -15,11 +15,11 @@ package org.jacoco.cli.internal.commands;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import org.jacoco.cli.internal.Command;
 import org.jacoco.core.tools.ExecFileLoader;
+import org.jacoco.core.tools.ExecMergeHandle;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
 
@@ -33,6 +33,12 @@ public class Merge extends Command {
 
 	@Option(name = "--destfile", usage = "file to write merged execution data to", metaVar = "<path>", required = true)
 	File destfile;
+
+	@Option(name = "--id", usage = "project id Use when merging different versions exec file", metaVar = "<n>")
+	int projectId;
+
+	@Option(name = "--diffPort", usage = "code-diff services port", required = true)
+	int diffPort;
 
 	@Override
 	public String description() {
@@ -49,19 +55,58 @@ public class Merge extends Command {
 		return 0;
 	}
 
+	// private ExecFileLoader loadExecutionData(final PrintWriter out)
+	// throws IOException {
+	// final ExecFileLoader loader = new ExecFileLoader();
+	// if (execfiles.isEmpty()) {
+	// out.println("[WARN] No execution data files provided.");
+	// } else {
+	// for (final File file : execfiles) {
+	// out.printf("[INFO] Loading execution data file %s.%n",
+	// file.getAbsolutePath());
+	// loader.load(file);
+	// }
+	// }
+	// return loader;
+	// }
+
 	private ExecFileLoader loadExecutionData(final PrintWriter out)
 			throws IOException {
-		final ExecFileLoader loader = new ExecFileLoader();
+		ExecFileLoader loader = new ExecFileLoader();
 		if (execfiles.isEmpty()) {
 			out.println("[WARN] No execution data files provided.");
 		} else {
+			List<ExecFileLoader> execFileLoaders = new ArrayList<ExecFileLoader>();
 			for (final File file : execfiles) {
 				out.printf("[INFO] Loading execution data file %s.%n",
 						file.getAbsolutePath());
-				loader.load(file);
+				ExecFileLoader subData = new ExecFileLoader();
+				subData.load(file);
+				execFileLoaders.add(subData);
 			}
+			execSort(execFileLoaders);
+			loader = new ExecMergeHandle(projectId, diffPort)
+					.mergeExecHandle(execFileLoaders);
 		}
 		return loader;
 	}
 
+	/**
+	 * 按照开始记录的时间戳倒叙list
+	 *
+	 * @param execFileLoaders
+	 */
+	private void execSort(List<ExecFileLoader> execFileLoaders) {
+		Collections.sort(execFileLoaders, new Comparator<ExecFileLoader>() {
+			@Override
+			public int compare(ExecFileLoader o1, ExecFileLoader o2) {
+				int l1 = o1.getSessionInfoStore().getInfos().size();
+				int l2 = o2.getSessionInfoStore().getInfos().size();
+				return (int) (o2.getSessionInfoStore().getInfos().get(l2 - 1)
+						.getStartTimeStamp()
+						- o1.getSessionInfoStore().getInfos().get(l1 - 1)
+								.getStartTimeStamp());
+			}
+		});
+	}
 }

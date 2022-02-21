@@ -16,6 +16,8 @@ import static java.lang.String.format;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.jacoco.core.internal.data.CompactDataInput;
 
@@ -31,7 +33,11 @@ public class ExecutionDataReader {
 
 	private IExecutionDataVisitor executionDataVisitor = null;
 
+	private IProjectInfoVisitor projectInfoVisitor = null;
+
 	private boolean firstBlock = true;
+
+	private ExecutionData executionData;
 
 	/**
 	 * Creates a new reader based on the given input stream input. Depending on
@@ -63,6 +69,14 @@ public class ExecutionDataReader {
 	 */
 	public void setExecutionDataVisitor(final IExecutionDataVisitor visitor) {
 		this.executionDataVisitor = visitor;
+	}
+
+	public IProjectInfoVisitor getProjectInfoVisitor() {
+		return projectInfoVisitor;
+	}
+
+	public void setProjectInfoVisitor(IProjectInfoVisitor projectInfoVisitor) {
+		this.projectInfoVisitor = projectInfoVisitor;
 	}
 
 	/**
@@ -115,6 +129,15 @@ public class ExecutionDataReader {
 		case ExecutionDataWriter.BLOCK_EXECUTIONDATA:
 			readExecutionData();
 			return true;
+		case ExecutionDataWriter.BLOCK_PROJECTINFO:
+			readProjectInfo();
+			return true;
+		case ExecutionDataWriter.BLOCK_CALLEDCHAINFLAG:
+			readSetArray();
+			return true;
+		case ExecutionDataWriter.BLOCK_CALLEDCHAINNODEDATA:
+			readChainNode();
+			return true;
 		default:
 			throw new IOException(
 					format("Unknown block type %x.", Byte.valueOf(blocktype)));
@@ -148,8 +171,33 @@ public class ExecutionDataReader {
 		final long id = in.readLong();
 		final String name = in.readUTF();
 		final boolean[] probes = in.readBooleanArray();
-		executionDataVisitor
-				.visitClassExecution(new ExecutionData(id, name, probes));
+		this.executionData = new ExecutionData(id, name, probes);
+		executionDataVisitor.visitClassExecution(this.executionData);
+	}
+
+	private void readProjectInfo() throws IOException {
+		if (projectInfoVisitor == null) {
+			throw new IOException("No project info visitor");
+		}
+		final String branchName = in.readUTF();
+		final String commitId = in.readUTF();
+		projectInfoVisitor.visitProjectInfo(branchName, commitId);
+	}
+
+	private void readSetArray() throws IOException {
+		if (executionDataVisitor == null) {
+			throw new IOException("No execution data visitor.");
+		}
+		HashSet[] sets = in.readSetArray();
+		this.executionData.setCalledFlags(sets);
+	}
+
+	private void readChainNode() throws IOException {
+		if (projectInfoVisitor == null) {
+			throw new IOException("No project info visitor");
+		}
+		Set<ChainNode> chainNodes = in.readChainNodeSet();
+		projectInfoVisitor.visitCalledChainData(chainNodes);
 	}
 
 }

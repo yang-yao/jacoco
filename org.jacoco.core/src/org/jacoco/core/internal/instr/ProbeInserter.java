@@ -36,10 +36,18 @@ class ProbeInserter extends MethodVisitor implements IProbeInserter {
 	private final boolean clinit;
 
 	/** Position of the inserted variable. */
-	private final int variable;
+	private int variable;
 
 	/** Maximum stack usage of the code to access the probe array. */
 	private int accessorStackSize;
+
+	private String uri; // 每个方法的唯一资源标识
+
+	private String methodName;
+
+	private String className;
+
+	private boolean isNotAddChain;
 
 	/**
 	 * Creates a new {@link ProbeInserter}.
@@ -66,6 +74,25 @@ class ProbeInserter extends MethodVisitor implements IProbeInserter {
 			pos += t.getSize();
 		}
 		variable = pos;
+		// variable = pos + 1; // 现在要多放一个变量，jacocoCalledFlagSets
+		this.methodName = name;
+		// this.init = "<init>".equals(name);
+		// fixVariable();
+		this.isNotAddChain = "<init>".equals(name) || this.clinit;
+	}
+
+	private void fixVariable() {
+		if (this.methodName.contains("<init>")) {
+			this.variable = variable - 1;
+		}
+	}
+
+	public String getClassName() {
+		return className;
+	}
+
+	public void setClassName(String className) {
+		this.className = className;
 	}
 
 	public void insertProbe(final int id) {
@@ -89,17 +116,85 @@ class ProbeInserter extends MethodVisitor implements IProbeInserter {
 		// Stack[0]: [Z
 
 		mv.visitInsn(Opcodes.BASTORE);
+
+		// 探针插入完成后，插入calledFlagSets相关操作
+		insertCalledFlagSets(id);
+	}
+
+	private void insertCalledFlagSets(final int id) {
+		// 过滤掉init方法以及静态代码块
+		if (isNotAddChain) {
+			return;
+		}
+		// mv.visitVarInsn(Opcodes.ALOAD, variable - 1); //
+		// 因为我把$jacocoFlagSets变量存储在variable-1
+		// 这个slot位置
+		/**
+		 * 不使用上面那种从局部变量表中读取了 因为在压入变量表的时候，容易出现问题，所以直接通过调用jacocoSetInit方法获取set[]
+		 */
+		mv.visitMethodInsn(Opcodes.INVOKESTATIC, className,
+				InstrSupport.INITSETMETHOD_NAME,
+				InstrSupport.INITSETMETHOD_DESC, false);
+
+		// Stack[0]: [Ljava/util/HashSet
+
+		InstrSupport.push(mv, id);
+
+		// Stack[1]: I
+		// Stack[0]: [Ljava/util/HashSet
+
+		mv.visitInsn(Opcodes.AALOAD);
+
+		// Stack[0]: Ljava/util/HashSet
+
+		mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+				InstrSupport.CHAIN_HANDLE_CLASSNAME,
+				InstrSupport.SET_CALLED_FLAG_METHOD_NAME,
+				InstrSupport.SET_CALLED_FLAG_METHOD_DESC, false);
+		// Stack: []
 	}
 
 	@Override
 	public void visitCode() {
+		// 构造函数过滤掉
+		if (!isNotAddChain) {
+			// 插入调用链路相关代码
+			arrayStrategy.callChainHandleMethod(mv, uri);
+		}
 		accessorStackSize = arrayStrategy.storeInstance(mv, clinit, variable);
+		/**
+		 * 为了处理init方法中不添加set数组，暂时这么处理一下看看
+		 */
+		// accessorStackSize = arrayStrategy.storeInstance(mv, init, variable);
 		mv.visitCode();
 	}
 
 	@Override
 	public final void visitVarInsn(final int opcode, final int var) {
 		mv.visitVarInsn(opcode, map(var));
+	}
+
+	@Override
+	public void visitInsn(final int opcode) {
+		switch (opcode) {
+		case Opcodes.IRETURN:
+		case Opcodes.LRETURN:
+		case Opcodes.FRETURN:
+		case Opcodes.DRETURN:
+		case Opcodes.ARETURN:
+		case Opcodes.RETURN:
+		case Opcodes.ATHROW:
+			// 构造函数过滤掉
+			if (!isNotAddChain) {
+				// 插入调用链路相关代码
+				arrayStrategy.SetCalledNodeMethod(mv, uri);
+			}
+			super.visitInsn(opcode);
+			break;
+		default:
+			super.visitInsn(opcode);
+			break;
+		}
 	}
 
 	@Override
@@ -179,4 +274,7 @@ class ProbeInserter extends MethodVisitor implements IProbeInserter {
 		mv.visitFrame(type, newIdx, newLocal, nStack, stack);
 	}
 
+	public void setUri(String uri) {
+		this.uri = uri;
+	}
 }

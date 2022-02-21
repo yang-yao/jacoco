@@ -17,6 +17,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -60,17 +61,26 @@ public class DumpTest extends CommandTestBase {
 	@Test
 	public void should_write_dump() throws Exception {
 
-		File execfile = new File(tmp.getRoot(), "jacoco.exec");
-		int port = startMockServer();
+		// File execfile = new File(tmp.getRoot(), "jacoco.exec");
+		File execfile = new File("C:\\Users\\wl\\Desktop\\dump2.exec");
+		// int port = startMockServer();
 
-		execute("dump", "--destfile", execfile.getAbsolutePath(), "--port",
-				String.valueOf(port));
+		execute("dump", "--destfile", execfile.getAbsolutePath(), "--address",
+				"192.168.100.83", "--port", "6300");
 
 		assertOk();
 		assertContains("[INFO] Connecting to ", out);
 		assertContains("[INFO] Writing execution data to "
 				+ execfile.getAbsolutePath(), out);
 		assertTrue(execfile.exists());
+	}
+
+	@Test
+	public void test11() {
+		BigDecimal num1 = new BigDecimal(6);
+		BigDecimal num2 = new BigDecimal(7);
+		System.out.println(num1.compareTo(num2));
+
 	}
 
 	@Test

@@ -10,20 +10,14 @@
  *    Marc R. Hoffmann - initial API and implementation
  *
  *******************************************************************************/
-package org.jacoco.core.internal.flow;
+package org.jacoco.core.data;
 
-/**
- * Internal interface to create probe ids unique within a class.
- */
-public interface IProbeIdGenerator {
+import java.util.HashSet;
+import java.util.Set;
 
-	/**
-	 * Returns the next unique probe id.
-	 *
-	 * @return unique probe id
-	 */
-	int nextId();
+public interface IProjectInfoVisitor {
 
-	int getCurrentId();
+	void visitProjectInfo(String branchName, String commitId);
 
+	void visitCalledChainData(Set<ChainNode> chainNodes);
 }

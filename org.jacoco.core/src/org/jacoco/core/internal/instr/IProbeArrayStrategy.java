@@ -46,4 +46,20 @@ public interface IProbeArrayStrategy {
 	 */
 	void addMembers(ClassVisitor cv, int probeCount);
 
+	/**
+	 * 添加链路调用的
+	 *
+	 * @param mv
+	 * @param uri
+	 */
+	void callChainHandleMethod(MethodVisitor mv, String uri);
+
+	/**
+	 * 每个方法结束的时候调用，设置调用节点；以及判断调用链路是否完成
+	 *
+	 * @param mv
+	 * @param uri
+	 */
+	void SetCalledNodeMethod(final MethodVisitor mv, final String uri);
+
 }

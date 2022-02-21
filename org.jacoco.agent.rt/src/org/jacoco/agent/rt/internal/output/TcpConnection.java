@@ -100,7 +100,7 @@ class TcpConnection implements IRemoteCommandVisitor {
 	public void visitDumpCommand(final boolean dump, final boolean reset)
 			throws IOException {
 		if (dump) {
-			data.collect(writer, writer, reset);
+			data.collect(writer, writer, writer, reset);
 		} else {
 			if (reset) {
 				data.reset();

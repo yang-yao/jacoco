@@ -12,11 +12,14 @@
  *******************************************************************************/
 package org.jacoco.agent.rt.internal;
 
+import java.io.File;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
+import java.util.Objects;
 
+import org.apache.commons.io.FileUtils;
 import org.jacoco.core.instr.Instrumenter;
 import org.jacoco.core.runtime.AgentOptions;
 import org.jacoco.core.runtime.IRuntime;
@@ -86,9 +89,25 @@ public class CoverageTransformer implements ClassFileTransformer {
 		if (!filter(loader, classname, protectionDomain)) {
 			return null;
 		}
+		if (classname.endsWith("Vo") || classname.endsWith("Bo")
+				|| classname.contains("/entity/")) {
+			return null;
+		}
 
 		try {
 			classFileDumper.dump(classname, classfileBuffer);
+			// if (classname.contains(
+			// "com/icar/finance/maintenance/base/MaintenanceResult")) {
+			// System.out.println("start gen MaintenanceResult.class file");
+			// // String filePath =
+			// //
+			// "G:\\jvm\\javaagent\\target\\classes\\com\\asm\\MaintenanceResult.class";
+			// String filePath = "/root/MaintenanceResult.class";
+			// byte[] bytes = instrumenter.instrument(classfileBuffer,
+			// classname);
+			// FileUtils.writeByteArrayToFile(new File(filePath), bytes);
+			// return bytes;
+			// }
 			return instrumenter.instrument(classfileBuffer, classname);
 		} catch (final Exception ex) {
 			final IllegalClassFormatException wrapper = new IllegalClassFormatException(
