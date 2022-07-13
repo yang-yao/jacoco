@@ -213,6 +213,30 @@ public class ExecMergeHandle {
 							newExec.getExecutionDataStore(), className);
 					Set[] oldSets = getTargetCalledFlags(
 							oldExec.getExecutionDataStore(), className);
+					if (Objects.isNull(oldProbes)) {
+						// ignore
+						continue;
+					} else if (Objects.isNull(newProbes)
+							&& !Objects.isNull(oldProbes)) {
+						// new exec modify class not init
+						// get probes size
+						int newProbesSize = 0;
+						for (MethodProbesInfo info : newCoverage
+								.getMethodProbesInfos()) {
+							int len = info.getEndIndex() - info.getStartIndex()
+									+ 1;
+							newProbesSize += len;
+						}
+						newProbes = new boolean[newProbesSize];
+						newSets = new HashSet[newProbes.length];
+						for (int i = 0; i < newSets.length; i++) {
+							newSets[i] = new HashSet();
+						}
+						ExecutionData data = new ExecutionData(
+								newCoverage.getId(), className, newProbes,
+								(HashSet[]) newSets);
+						newExec.getExecutionDataStore().put(data);
+					}
 					// 这里应该还要加上set数据的合并
 					while (length-- > 0) {
 						newProbes[newStartIndex] = newProbes[newStartIndex]
@@ -256,7 +280,7 @@ public class ExecMergeHandle {
 				return data.getProbes();
 			}
 		}
-		return new boolean[0];
+		return null;
 	}
 
 	private Set[] getTargetCalledFlags(ExecutionDataStore executionDataStore,
@@ -269,7 +293,7 @@ public class ExecMergeHandle {
 				return data.getCalledFlags();
 			}
 		}
-		return new HashSet[0];
+		return null;
 	}
 
 	private MethodProbesInfo getNewMPI(List<MethodProbesInfo> infos,
@@ -358,8 +382,8 @@ public class ExecMergeHandle {
 		data.put("id", String.valueOf(projectId));
 		data.put("newVersion", branchName);
 		data.put("oldVersion", branchName);
-		data.put("diffTypeCode", String.valueOf(1)); // 暂时先写死，因为不支持不同分支合并，所以这里只会是commit
-														// diff
+		data.put("diffTypeCode", String.valueOf(1));// 暂时先写死，因为不支持不同分支合并，所以这里只会是commit
+													// diff
 		data.put("oldCommitId", oldCommit);
 		data.put("newCommitId", newCommit);
 
