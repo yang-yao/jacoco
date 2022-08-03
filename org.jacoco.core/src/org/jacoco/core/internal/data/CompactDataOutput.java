@@ -12,17 +12,13 @@
  *******************************************************************************/
 package org.jacoco.core.internal.data;
 
-import com.test.diff.common.util.JacksonUtil;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
+import com.test.diff.common.util.FastJsonUtil;
+
 import org.jacoco.core.data.ChainNode;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -119,10 +115,9 @@ public class CompactDataOutput extends DataOutputStream {
 	public static final int WRITE_READ_UTF_MAX_LENGTH = 65535;
 
 	public void writeChainNodeSet(Set<ChainNode> chainNodes) throws Exception {
-		System.out.println("chain set size: " + chainNodes.size());
 		writeVarInt(chainNodes.size());
 		for (ChainNode chainNode : chainNodes) {
-			String str = JacksonUtil.serialize(chainNode);
+			String str = FastJsonUtil.serialize(chainNode);
 			// writeVarInt(bytes.length);
 			// write(bytes);
 			if (str.length() > WRITE_READ_UTF_MAX_LENGTH) {
@@ -137,7 +132,6 @@ public class CompactDataOutput extends DataOutputStream {
 				writeUTF(str);
 			}
 		}
-		System.out.println("chainNode set output completed");
 	}
 
 }

@@ -12,14 +12,11 @@
  *******************************************************************************/
 package org.jacoco.agent.rt.internal;
 
-import java.io.File;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
-import java.util.Objects;
 
-import org.apache.commons.io.FileUtils;
 import org.jacoco.core.instr.Instrumenter;
 import org.jacoco.core.runtime.AgentOptions;
 import org.jacoco.core.runtime.IRuntime;
@@ -89,10 +86,10 @@ public class CoverageTransformer implements ClassFileTransformer {
 		if (!filter(loader, classname, protectionDomain)) {
 			return null;
 		}
-		if (classname.endsWith("Vo") || classname.endsWith("Bo")
-				|| classname.contains("/entity/")) {
-			return null;
-		}
+		// if (classname.endsWith("Vo") || classname.endsWith("Bo")
+		// || classname.contains("/entity/")) {
+		// return null;
+		// }
 
 		try {
 			classFileDumper.dump(classname, classfileBuffer);

@@ -34,16 +34,16 @@ public class ChainNodeHandle {
 		ChainNode currentNode = new ChainNode();
 		currentNode.setUri(uri);
 		// set headNode
-		if (headNode.get() == null) {
+		if (Objects.isNull(headNode.get())) {
 			// System.out.println(">>>> set headNode: " + currentNode.getUri() +
 			// " <<<<");
 			headNode.set(currentNode);
 		}
 		// set preNode
-		if (tailNode.get() != null) {
+		if (!Objects.isNull(tailNode.get())) {
 			currentNode.setPreNode(tailNode.get());
 		}
-		if (calledNode.get() != null) {
+		if (!Objects.isNull(calledNode.get())) {
 			// 为了避免相互引用太复杂，调用节点全部直接生成
 			// currentNode.setCalledNode(calledNode.get());
 			ChainNode call = new ChainNode();
@@ -66,8 +66,8 @@ public class ChainNodeHandle {
 			// <<<<");
 			// System.out.println(">>>> current thread name: "
 			// + Thread.currentThread().getName() + " <<<<");
+			addChainLock.lock();
 			try {
-				addChainLock.lock();
 				chainsSet.add(tailNode.get());
 				System.out.println("---------->>>> method chain : "
 						+ tailNode.get().toString() + " <<<<--------------");
@@ -80,10 +80,10 @@ public class ChainNodeHandle {
 				 * 上面解释的不正确，在tomcat中，有固定的线程池，每次都是分配这些线程，
 				 * 当headNode不设置为null后，那么这个线程只有第一次设置的headNode请求，才会被记录
 				 */
+				addChainLock.unlock();
 				headNode.set(null);
 				tailNode.set(null);
 				calledNode.set(null);
-				addChainLock.unlock();
 			}
 		} else {
 			if (Objects.isNull(calledNode.get())

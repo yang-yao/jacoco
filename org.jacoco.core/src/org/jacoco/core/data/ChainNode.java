@@ -75,7 +75,7 @@ public class ChainNode implements Serializable {
 	public int hashCode() {
 		int num = this.uri.hashCode();
 		ChainNode preNode = this.preNode;
-		while ( !Objects.isNull(preNode) ) {
+		while (!Objects.isNull(preNode)) {
 			num += preNode.uri.hashCode();
 			preNode = preNode.preNode;
 		}
