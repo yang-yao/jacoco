@@ -12,14 +12,12 @@
  *******************************************************************************/
 package org.jacoco.core.internal.data;
 
-import com.test.diff.common.util.JacksonUtil;
+import com.test.diff.common.util.FastJsonUtil;
 import org.jacoco.core.data.ChainNode;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -113,7 +111,7 @@ public class CompactDataInput extends DataInputStream {
 				str = readUTF();
 			}
 			sb.append(str);
-			ChainNode chainNode = JacksonUtil.deserialize(sb.toString(),
+			ChainNode chainNode = FastJsonUtil.deserialize(sb.toString(),
 					ChainNode.class);
 			chainNodes.add(chainNode);
 		}

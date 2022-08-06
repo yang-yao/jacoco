@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ChainNode implements Serializable {
 
@@ -72,8 +73,13 @@ public class ChainNode implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return this.preNode == null ? this.uri.hashCode()
-				: this.uri.hashCode() + this.preNode.hashCode();
+		int num = this.uri.hashCode();
+		ChainNode preNode = this.preNode;
+		while (!Objects.isNull(preNode)) {
+			num += preNode.uri.hashCode();
+			preNode = preNode.preNode;
+		}
+		return num;
 	}
 
 	@Override
